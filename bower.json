@@ -22,5 +22,6 @@
   ],
   "dependencies": {
     "angular-resource": "~1.2.26"
-  }
+  },
+  "homepage": "https://github.com/extensivepro/bower-ef-services2"
 }
