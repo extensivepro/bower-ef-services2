@@ -10,10 +10,12 @@ gulp.task('build', function () {
     .pipe(gulp.dest('./'));
 })
 
-gulp.task('default', function () {
+gulp.task('git', function () {
 	git.pull('origin', 'master', {args: '--rebase'}, function (err) {
 		if (err) throw err;
 		gulp.src('./*.js')
 			.pipe(git.commit('gulp commit'))
 	})
 })
+
+gulp.task('default', ['build'])
