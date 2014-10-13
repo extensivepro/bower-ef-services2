@@ -13,7 +13,7 @@ gulp.task('build', function () {
 gulp.task('default', function () {
 	git.pull('origin', 'master', {args: '--rebase'}, function (err) {
 		if (err) throw err;
-		// gulp.src('./*')
-		// 	.pipe(git.commit('gulp commit'))
+		gulp.src('./*.js')
+			.pipe(git.commit('gulp commit'))
 	})
 })
