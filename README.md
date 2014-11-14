@@ -1,6 +1,6 @@
 BOWER EXPRO FUTURE SERVICE 2
 ===
-AngularJS SDK of loopback[http://loopback.io]
+AngularJS SDK of [Loopback](http://loopback.io)
 
 ## Quick Start
 
