@@ -29,6 +29,7 @@ module.factory(
           include:['merchant', 'shop']
         }
       }, function (employe) {
+        props = Object.keys(employe)
         props.forEach(function (name) {
           self[name] = employe[name]
           save(name, self[name])
@@ -126,7 +127,7 @@ module.factory(
   }
 
   DealTransaction.prototype.registerItem = function (item) {
-    var exited = this.items.some(function (dealItem) {
+    var found = this.items.some(function (dealItem) {
       if(item.id === dealItem.item.id) {
         dealItem.quantity++
         this.quantity++
@@ -136,18 +137,21 @@ module.factory(
         return false
       }
     }, this)
-    if(exited) return
-    this.items.push({
-      item: {
-        id: item.id,
-        "name": item.name,
-        price: item.price
-      },
-      dealPrice: item.price,
-      quantity: 1
-    })        
-    this.quantity += 1
-    this.fee += item.price 
+    if(!found) {
+      var dealItem = {
+        id: uuid.v4(),
+        dealPrice: item.price,
+        quantity: 1,
+        item: {
+          "name": item.name,
+          id: item.id,
+          price: item.price
+        }
+      }
+      this.items.push(dealItem)
+      this.quantity += 1
+      this.fee += dealItem.dealPrice
+    }
   }
   
   DealTransaction.prototype.registerItems = function (items) {
