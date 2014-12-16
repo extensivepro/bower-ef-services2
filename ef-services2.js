@@ -51,8 +51,7 @@ module.factory(
   
   function save(name, value) {
     var key = '$CurrentEmploye$' + name
-    if (value == null) value = ''
-    localStorage[key] = value
+    localStorage[key] = value || ''
   }
   
   function load(name) {
@@ -67,11 +66,14 @@ module.factory(
   var props = ['serialNumber', 'seller', 'merchantID', 'shopID', 'quantity', 'fee', 'items', 'bill']
   
   function DealTransaction() {
-
     props.forEach(function (name) {
       this[name] = load(name)
     }, this)
 
+    this.initDealTransaction()
+  }
+  
+  DealTransaction.prototype.initDealTransaction = function () {
     var now = Date.now()
     var employe = CurrentEmploye
     this.merchantID =  this.merchantID || employe.merchantID,
@@ -186,12 +188,21 @@ module.factory(
     })
   }
   
+  DealTransaction.prototype.close = function () {
+    
+    props.forEach(function (name) {
+      this[name] = null
+      save(name, null)
+    }, this)
+    
+    this.initDealTransaction()
+  }
+  
   return new DealTransaction()
 
   function save(name, value) {
     var key = '$DealTransaction$' + name
-    if (value == null) value = ''
-    localStorage[key] = value
+    localStorage[key] = value || ''
   }
   
   function load(name) {
