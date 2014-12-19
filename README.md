@@ -16,6 +16,8 @@ Index.html
 <script src="lib/angular-resource/angular-resource.js"></script>
 <script src="lib/ef-services2/ef-lbservices.js"></script>
 <script src="lib/ef-services2/ef-services2.js"></script>
+<script src="lib/ef-services2/ef-directive.js"></script>
+<script src="lib/ef-services2/ef-filter.js"></script>
 
 ...
 ```
