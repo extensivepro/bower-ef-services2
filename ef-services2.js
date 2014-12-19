@@ -50,12 +50,12 @@ module.factory(
   return new CurrentEmploye()
   
   function save(name, value) {
-    var key = '$CurrentEmploye$' + name
+    var key = '$EFCurrentEmploye$' + name
     localStorage[key] = value || ''
   }
   
   function load(name) {
-    return localStorage['$CurrentEmploye$' + name] || null
+    return localStorage['$EFCurrentEmploye$' + name] || null
   }
 });
 
@@ -89,6 +89,7 @@ module.factory(
     this.items = this.items || []
     this.bill = this.bill || {
       amount: 0,
+      discountAmount: 0,
       billNumber: now,
       shopID: employe.shopID,
       merchantID: employe.merchantID,
@@ -166,25 +167,32 @@ module.factory(
     }
     
     this.bill.amount = this.fee
+
+    var paidAmount = this.bill.cashSettlement && this.bill.cashSettlement.amount || 0
+    paidAmount += this.bill.memberSettlement && this.bill.memberSettlement.amount || 0
+
+    if(paidAmount < this.bill.amount - this.bill.discountAmount) {
+      return errorCb(null, {type: 'danger', msg: '付款金额不足'})
+    }
+
     this.bill.cashSettlement = validateSettlement(this.bill.cashSettlement)
     this.bill.memberSettlement = validateSettlement(this.bill.memberSettlement)
 
-    var paidAmount = 0
-    if(this.bill.cashSettlement) {
-      paidAmount += this.bill.cashSettlement.amount
-    }
-    if(this.bill.memberSettlement) {
-      paidAmount += this.bill.memberSettlement.amount
-    }
-    if(paidAmount < this.bill.amount - this.bill.discountAmount) {
-      return errorCb(null, {type: 'danger', msg: '支付金额不足'})
-    }
     var entity = {}
     props.forEach(function (name) {
       entity[name] = this[name]
     }, this)
-    Deal.create(entity, successCb, function (res) {
-      errorCb(res, {type: 'danger', msg: '创建失败'})
+    
+    var self = this
+    Deal.create(entity, function (value, responseHeader) {
+      self.close()
+      successCb(arguments)
+    }, function (res) {
+      var error = {type: 'danger', msg: '交易不合规'}
+      if(res.status >= 500) {
+        error.msg = '网络服务不可用'
+      }
+      errorCb(res, error)
     })
   }
   
@@ -201,12 +209,12 @@ module.factory(
   return new DealTransaction()
 
   function save(name, value) {
-    var key = '$DealTransaction$' + name
+    var key = '$EFDealTransaction$' + name
     localStorage[key] = value || ''
   }
   
   function load(name) {
-    return localStorage['$DealTransaction$' + name] || null
+    return localStorage['$EFDealTransaction$' + name] || null
   }
 
 });
