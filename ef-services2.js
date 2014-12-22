@@ -63,7 +63,7 @@ module.factory(
   'DealTransaction', 
   function (CurrentEmploye, Deal) {
 
-  var props = ['serialNumber', 'seller', 'merchantID', 'shopID', 'quantity', 'fee', 'items', 'bill']
+  var props = ['serialNumber', 'seller', 'merchantID', 'shopID', 'quantity', 'fee', 'items', 'bill', 'member', 'buyer']
   
   function DealTransaction() {
     props.forEach(function (name) {
@@ -105,7 +105,7 @@ module.factory(
     }
   }
   
-  DealTransaction.prototype.setMember = function (member) {
+  DealTransaction.prototype.setMember = function (member) {    
     if(!member) {
       this.bill.memberSettlement = null
       this.buyer = null
@@ -161,13 +161,42 @@ module.factory(
     items.forEach(this.registerItem, this)
   }
   
+  DealTransaction.prototype.account = function () {
+    this.bill.amount = this.fee
+    this.bill.discountAmount = this.bill.discountAmount || 0
+    if(this.bill.memberSettlement) {
+      var payableAmount = this.payableAmount()
+      this.bill.memberSettlement.amount = payableAmount > this.bill.memberSettlement.payerAccount.balance ?  this.bill.memberSettlement.payerAccount.balance : payableAmount
+    }
+    if(this.change() > 0) {
+      this.bill.cashSettlement.amount = this.change()
+    }
+  }
+  
+  DealTransaction.prototype.payableAmount = function () {
+    return this.bill.amount-this.bill.discountAmount
+  }
+  
+  DealTransaction.prototype.change = function () {
+    var change = this.payableAmount()
+    change -= this.bill.memberSettlement && this.bill.memberSettlement.amount || 0
+    change -= this.bill.cashSettlement && this.bill.cashSettlement.amount || 0
+    return change
+  }
+
   DealTransaction.prototype.settle = function (successCb, errorCb) {
     var validateSettlement = function (settlement) {
       return settlement && settlement.amount > 0 ? settlement : null
     }
     
-    this.bill.amount = this.fee
+    this.bill.amount = this.bill.amount || this.fee
 
+    if(this.bill.memberSettlement &&
+      this.bill.memberSettlement.payerAccount &&
+      this.bill.memberSettlement.payerAccount.balance < this.bill.memberSettlement.amount) {
+      return errorCb(null, {type: 'danger', msg: '客户储值账户余额不足'})
+    }
+    
     var paidAmount = this.bill.cashSettlement && this.bill.cashSettlement.amount || 0
     paidAmount += this.bill.memberSettlement && this.bill.memberSettlement.amount || 0
 

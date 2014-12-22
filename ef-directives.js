@@ -1,12 +1,14 @@
 'use strict'
 
-angular.module('ef.directives',[]).directive('ngCurrency', ['$filter', function ($filter) {
+angular.module('ef.directives',[])
+
+.directive('efCurrency', ['$filter', function ($filter) {
   return {
     require: 'ngModel',
     link: function (scope, element, attrs, ngModel) {
-
-      ngModel.$formatters.unshift(function (a) {
-        return $filter('currency')(ngModel.$modelValue/100)
+      
+      ngModel.$formatters.push(function (value) {
+        return (value/100)
       })
       
       ngModel.$parsers.push(function (viewValue) {
@@ -16,3 +18,21 @@ angular.module('ef.directives',[]).directive('ngCurrency', ['$filter', function 
     }
   }
 }])
+
+.directive('efDealtype', function () {
+  return {
+    restrict: 'A',
+    link:  function (scope, elem, attrs) {
+      var cssClass = 'icon '
+      if(attrs.efDealtype === 'deal') {
+        cssClass += 'ion-ios7-cart royal'
+      } else if(attrs.efDealtype === 'prepay') {
+        cssClass += 'ion-ios7-download energized'
+      } else {
+        cssClass += 'ion-ios7-backspace'
+      }
+      
+      elem.addClass(cssClass)
+    }
+  }
+})
