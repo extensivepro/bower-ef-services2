@@ -4,7 +4,7 @@ var module = angular.module("ef-services2", ['lbServices'])
 
 module.factory(
   'CurrentEmploye', 
-  function (Employe) {
+  function (Employe, $rootScope) {
 
   var props = ['id', 'name', 'merchantID', 'shopID', 'merchant', 'shop']
   
@@ -34,6 +34,7 @@ module.factory(
           self[name] = employe[name]
           save(name, self[name])
         })
+        $rootScope.boardcast('CURRENT_EMPLOYE_READY')
       }, function (res) {
         console.log('Find employe error')
       })
@@ -164,13 +165,13 @@ module.factory(
   DealTransaction.prototype.account = function () {
     this.bill.amount = this.fee
     this.bill.discountAmount = this.bill.discountAmount || 0
+    var payableAmount = this.payableAmount()
     if(this.bill.memberSettlement) {
-      var payableAmount = this.payableAmount()
       this.bill.memberSettlement.amount = payableAmount > this.bill.memberSettlement.payerAccount.balance ?  this.bill.memberSettlement.payerAccount.balance : payableAmount
+      payableAmount -= this.bill.memberSettlement.amount
     }
-    if(this.change() > 0) {
-      this.bill.cashSettlement.amount = this.change()
-    }
+    this.bill.cashSettlement.amount = payableAmount
+    
   }
   
   DealTransaction.prototype.payableAmount = function () {
@@ -181,7 +182,7 @@ module.factory(
     var change = this.payableAmount()
     change -= this.bill.memberSettlement && this.bill.memberSettlement.amount || 0
     change -= this.bill.cashSettlement && this.bill.cashSettlement.amount || 0
-    return change
+    return 0-change
   }
 
   DealTransaction.prototype.settle = function (successCb, errorCb) {
@@ -246,6 +247,6 @@ module.factory(
     return localStorage['$EFDealTransaction$' + name] || null
   }
 
-});
-
+})
+  
 })(window, window.angular);

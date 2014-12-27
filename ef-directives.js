@@ -8,13 +8,16 @@ angular.module('ef.directives',[])
     link: function (scope, element, attrs, ngModel) {
       
       ngModel.$formatters.push(function (value) {
-        return (value/100)
+        return $filter('currency')(value/100, '¥')
       })
       
       ngModel.$parsers.push(function (viewValue) {
         return viewValue*100
       })
-            
+      
+      element.on("blur", function () {
+        element.val($filter('currency')(ngModel.$modelValue/100, '¥'))
+      })  
     }
   }
 }])
