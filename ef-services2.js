@@ -4,7 +4,7 @@ var module = angular.module("ef-services2", ['lbServices'])
 
 module.factory(
   'CurrentEmploye', 
-  function (Employe) {
+  function (Employe, $rootScope) {
 
   var props = ['id', 'name', 'merchantID', 'shopID', 'merchant', 'shop']
   
@@ -34,7 +34,7 @@ module.factory(
           self[name] = employe[name]
           save(name, self[name])
         })
-        // $rootScope.$broadcast('CURRENT_EMPLOYE_READY')
+        $rootScope.$broadcast('CURRENT_EMPLOYE_READY')
       }, function (res) {
         console.log('Find employe error')
       })
