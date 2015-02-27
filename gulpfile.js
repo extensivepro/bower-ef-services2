@@ -6,7 +6,7 @@ var git = require('gulp-git')
 gulp.task('build', function () {
   return gulp.src('../expro-future-service2/server/server.js')
     .pipe(loopbackAngular({apiUrl:'http://fankahui.com:3000/api'}))
-    .pipe(rename('ef-services2.js'))
+    .pipe(rename('ef-lbservices.js'))
     .pipe(gulp.dest('./'));
 })
 
